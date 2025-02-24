@@ -60,6 +60,14 @@ SRC_FILES += $(JSON_SOURCES)
 INCLUDES += $(JSON_CFLAGS)
 endif
 
+# file system
+LIBFS_ENABLE=y
+ifeq ($(LIBFS_ENABLE),y)
+include ./libfs/package.mk
+SRC_FILES += $(LIBFS_SOURCES)
+INCLUDES += $(LIBFS_CFLAGS)
+endif
+
 
 # 生成的对象文件列表
 # OBJ_FILES = $(SRC_FILES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)

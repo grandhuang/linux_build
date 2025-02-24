@@ -8,6 +8,7 @@
 #include "test.h"
 #include "mbedtls/md5.h"
 #include "uv.h"
+#include "cm_file_util.h"
 
 // 用于保存HTTP响应体的缓冲区
 struct MemoryStruct
@@ -57,6 +58,30 @@ void write_to_file(char *filename, const char *data)
         // 关闭文件
         fclose(fd);
     }
+}
+
+uint32_t file_write(void)
+{
+    char data[32] = "Hello world!";
+    if(cm_nv_write("file_test.txt", (char *)data, sizeof(data)) < 0)
+        {
+            printf("write to file %s filed\n", data);
+            // CM_FILE_LOG("write to file %s filed", data);
+            return -1;
+        }
+    return 0;
+}
+
+uint32_t file_read(void)
+{
+    char data[32] = {0};
+    if(cm_nv_read("file_test.txt", (char *)data, sizeof(data)) < 0)
+    {
+        printf("read from file %s filed\n", data);
+        // CM_FILE_LOG("read from file %s filed", data);
+        return -1;
+    }
+    return 0;
 }
 
 int main(void)
@@ -154,18 +179,29 @@ int main(void)
     curl_global_cleanup();
 
     /*cjson test*/
-
     int json_code = cjson_test_main();
 
     /*mbedtls test*/
     int mbedtls_code = mbedtls_md5_self_test(25582);
 
+    /*libcurl test*/
     char *libcurl_version = curl_version();
+
+    /*libuv test*/
     const char *uv_version = uv_version_string();
+
+    /*libfs test*/
+    uint32_t libfs_write_code = file_write();
+    uint32_t libfs_read_code = file_read();
+
+
     /*print test code*/
-    printf("######  curl version:%s\n", libcurl_version);
-    printf("######  mbedtls code:%d\n", mbedtls_code);
-    printf("######  cjson code  :%d\n", json_code);
-    printf("######  uv version  :%s\n", uv_version);
+    printf("######  curl version:       %s\n", libcurl_version);
+    printf("######  mbedtls code:       %d\n", mbedtls_code);
+    printf("######  cjson code:         %d\n", json_code);
+    printf("######  uv version:         %s\n", uv_version);
+    printf("######  libfs_write_code :  %d\n  \
+            ######  libfs_read_code:    %d\n", libfs_write_code, libfs_read_code);
+
     return 0; 
 }
