@@ -128,7 +128,7 @@ int cm_nv_read(const char *filename, char *data, uint32_t datalen)
     }
     else
     {
-        ret = ret;
+        ret = datalen;
     }
     printf("nv fread %d", ret);
     CM_FILE_LOGI("nv fread %d", ret);

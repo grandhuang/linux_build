@@ -102,7 +102,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 $(TARGET): $(OBJ_FILES) | $(BIN_DIR)
 	@echo compile time: $(shell date)
 	@$(CC) $(CFLAGS) $(OBJ_FILES) -o $@
-	@rm -rf $(OBJ_FILES)
+#	@rm -rf $(OBJ_FILES)
 	@echo "###########################################################"
 	@echo "###########################################################"
 	@echo "##################### compile success #####################"

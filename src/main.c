@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "main.h"
 #include "curl/curl.h"
 #include "curl/easy.h"
 #include "cJSON.h"
@@ -83,8 +84,7 @@ uint32_t file_read(void)
     }
     return 0;
 }
-
-int main(void)
+void curl_test(void)
 {
     CURL *curl_handle;
     CURLcode res;
@@ -177,7 +177,182 @@ int main(void)
     }
 
     curl_global_cleanup();
+}
 
+/*
+*@brief 写入文件(必选)
+*
+*@param[in] file_path 文件路径
+*@param[in] file_data 需要写入数据
+*@param[in] size  需要写入数据长度
+*
+*@return 成功:0 失败：-1
+*/
+int __cm_lbs_FileWrite(const char *file_path, void *file_data, uint32_t size)
+{
+#if 0
+    int ret = 0;
+    int fd = cm_nv_write(file_path, (char *)file_data, size);
+    if(fd < 0)
+    {
+        printf("error:%d fd = %d", errno, fd);
+        ret = -1;
+    }
+    return ret;
+
+#else
+    int ret = 0;
+    char real_path[128] = {0};
+    if(file_path == NULL || file_data == NULL || size == 0 || strlen(file_path) > 64)
+    {
+        printf("error:file_path or file_data is null");
+        return -1;
+    }
+    sprintf(real_path, "%s%s", "./", file_path);
+    FILE *fd = fopen(real_path, "wb+");
+    if(fd == NULL)
+    {
+        printf("fopen %s fail", real_path);
+        return -1;
+    }
+
+    int res = fwrite(file_data, size, 1, fd);
+    if(res != 1)
+    {
+        printf("fwrite to %s error", real_path);
+        return -1;
+    }
+    else
+    {
+        ret = size;
+    }
+    
+    fclose(fd);
+    return ret;
+#endif
+}
+
+/*
+*@brief 读取文件(必选)
+*
+*@param[in] file_path 文件路径
+*@param[in] file_data 读取缓存区
+*@param[in] size  读取长度
+*
+*@return 成功:0 失败：-1
+*/
+int __cm_lbs_FileRead(const char *file_path, void *file_rdata, uint32_t read_size)
+{
+#if 0
+
+    int ret = 0;
+    int fd = cm_nv_read(file_path, (char *)file_rdata, read_size);
+    if(fd <= 0)//读到0个数据，说明文件不存在或权限不足
+    {
+        printf("error:%d fd = %d", errno, fd);
+        ret = -1;
+    }
+    return ret;
+
+#else
+    int ret = 0;
+    char real_path[128] = {0};
+    if(file_path == NULL || file_rdata == NULL || read_size == 0 ||strlen(file_path) > 64)
+    {
+        printf("error:file_path or file_data is null");
+        return -1;
+    }
+
+    sprintf(real_path, "%s%s", "./", file_path);
+    FILE *fd = fopen(file_path, "r");
+    if(fd  == NULL)
+    {
+        printf("fopen %s fail", real_path);
+        return -1;
+    }
+    int res = fread((char *)file_rdata, read_size, 1, fd);
+    if(res != 1)
+    {
+        printf("fread from %s fail", real_path);
+        return -1;
+    }
+    else
+    {
+        ret = read_size;
+    }
+    fclose(fd);
+    return ret;
+#endif
+}
+
+#define CM_LBS_ATCMD_CONFIG_FILE_PATH  "./atcmd_lbscfg" 
+
+typedef struct
+{
+    uint32_t    age;
+    uint32_t    height;
+    char*       name[32];
+}info_t;
+
+typedef struct
+{
+    uint32_t    user_id;
+    info_t      info;
+}cfg_t;
+
+
+int cm_lbs_nv_test(void)
+{
+    LOG("");
+    cfg_t *atcmd_cfg = (cfg_t *)malloc(sizeof(cfg_t));
+    cfg_t *read_cfg = (cfg_t *)malloc(sizeof(cfg_t));
+    
+    atcmd_cfg->user_id = 10001;
+    atcmd_cfg->info.age = 25;
+    atcmd_cfg->info.height = 175;
+    memcpy(atcmd_cfg->info.name, "Mike", sizeof("Mike"));
+
+    LOG("atcmd_cfg init success");
+
+    // 打印结果以验证
+    printf("################### write cfg ###################\n");
+    printf("User ID: %d\n", atcmd_cfg->user_id);
+    printf("Age: %d\n", atcmd_cfg->info.age);
+    printf("Height: %d\n", atcmd_cfg->info.height);
+    printf("Name: %s\n", (char*)(atcmd_cfg->info.name));
+
+    
+    int ret_write = __cm_lbs_FileWrite(CM_LBS_ATCMD_CONFIG_FILE_PATH, (void *)atcmd_cfg, sizeof(cfg_t));
+    if(ret_write != 0)
+    {
+        LOG("write cfg success\nret_write = %d", ret_write);
+    }
+    
+
+    int ret_read = __cm_lbs_FileRead(CM_LBS_ATCMD_CONFIG_FILE_PATH, (void *)read_cfg, sizeof(cfg_t));
+    if(ret_read != 0)
+    {
+        LOG("read cfg success\nret_read = %d", ret_read);
+    }
+    
+    // 打印结果以验证
+    printf("#################### read cfg ##################\n");
+    printf("User ID: %d\n", read_cfg->user_id);
+    printf("Age: %d\n", read_cfg->info.age);
+    printf("Height: %d\n", read_cfg->info.height);
+    printf("Name: %s\n", (char*)(read_cfg->info.name));
+
+    int ret = (ret_read == ret_write) ? 0 : -1;
+
+    free(atcmd_cfg);
+    free(read_cfg);
+    return ret;
+}
+
+int main(void)
+{
+
+#if 0
     /*cjson test*/
     int json_code = cjson_test_main();
 
@@ -194,14 +369,21 @@ int main(void)
     uint32_t libfs_write_code = file_write();
     uint32_t libfs_read_code = file_read();
 
+ 
 
     /*print test code*/
     printf("######  curl version:       %s\n", libcurl_version);
     printf("######  mbedtls code:       %d\n", mbedtls_code);
     printf("######  cjson code:         %d\n", json_code);
     printf("######  uv version:         %s\n", uv_version);
-    printf("######  libfs_write_code :  %d\n  \
-            ######  libfs_read_code:    %d\n", libfs_write_code, libfs_read_code);
+    printf("######  libfs_write_code :  %d\n", libfs_write_code);
+    printf("######  libfs_read_code:    %d\n", libfs_read_code);
+#endif
+
+    /*cm_lbs nv file test*/
+    int nv_code =  cm_lbs_nv_test();
+
+    printf("######  cm_lbs_nv_code:     %d\n", nv_code);
 
     return 0; 
 }
