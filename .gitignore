@@ -1,3 +1,6 @@
+# .vscode文件
+/.vscode
+
 # 忽略output文件夹
 /output
 

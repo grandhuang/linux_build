@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "math.h": "c",
-        "cm_lbs_api.h": "c",
-        "cm_lbs_platform.h": "c",
-        "cm_lbs.h": "c",
-        "string.h": "c"
-    }
-}
