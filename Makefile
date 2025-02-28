@@ -68,6 +68,14 @@ SRC_FILES += $(LIBFS_SOURCES)
 INCLUDES += $(LIBFS_CFLAGS)
 endif
 
+# lbs
+LBS_ENABLE=n
+ifeq ($(LBS_ENABLE),y)
+include ./cm_lbs/package.mk
+SRC_FILES += $(LBS_SOURCES)
+INCLUDES += $(LBS_CFLAGS)
+endif
+
 
 # 生成的对象文件列表
 # OBJ_FILES = $(SRC_FILES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)

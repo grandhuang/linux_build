@@ -18,8 +18,8 @@ build_log(  )
 {
     echo ${HVER}${SWVER}
     echo ${INTVER}.${BUILD_TIME}_${RELVER}
-    echo "Last build:$(date)">>${BUILD_INFO_DIR}/buildtime.txt
-	echo "Version:${INTVER}.${BUILD_TIME}_${RELVER}">>${BUILD_INFO_DIR}/buildtime.txt
+    # echo "Last build:$(date)">>${BUILD_INFO_DIR}/buildtime.txt
+	# echo "Version:${INTVER}.${BUILD_TIME}_${RELVER}">>${BUILD_INFO_DIR}/buildtime.txt
     echo "build by $(whoami)"
 }
 
