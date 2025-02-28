@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "cm_file_util.h": "c",
-        "assert.h": "c",
-        "cm_file_platform.h": "c"
-    }
-}
